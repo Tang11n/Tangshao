@@ -128,11 +128,16 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
   if (req.method === 'OPTIONS') return preflight();
 
-  const path = url.pathname.replace(/\/+$/, '');
-  if (path === '' || path === '/' || path.endsWith('/health') || path.endsWith('/canvas-proxy')) return health();
-  if (path.endsWith('/media')) return media(url.searchParams);
-
+  // 【关键】POST 一律走转发，绝不参与路径判断。
+  //   画布的 proxyCall() 就是对代理根地址发 POST；Supabase 网关不剥
+  //   /functions/v1/canvas-proxy 前缀，根路径会被 endsWith 命中，
+  //   一旦把"根路径"当健康检查，转发请求就会被吞成 {"ok":true}。
   if (req.method === 'POST') return forward(req);
+
+  // 以下只处理 GET：/media 走媒体代理，根路径与 /health 返回健康检查
+  const path = url.pathname.replace(/\/+$/, '');
+  if (path.endsWith('/media')) return media(url.searchParams);
+  if (path === '' || path.endsWith('/health') || path.endsWith('/canvas-proxy')) return health();
 
   return jerr(405, 'Method not allowed');
 });
