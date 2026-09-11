@@ -129,7 +129,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') return preflight();
 
   const path = url.pathname.replace(/\/+$/, '');
-  if (path === '' || path.endsWith('/health')) return health();
+  if (path === '' || path === '/' || path.endsWith('/health') || path.endsWith('/canvas-proxy')) return health();
   if (path.endsWith('/media')) return media(url.searchParams);
 
   if (req.method === 'POST') return forward(req);
