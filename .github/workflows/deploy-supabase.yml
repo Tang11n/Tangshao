@@ -1,0 +1,29 @@
+name: Deploy Supabase Edge Function
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'supabase/**'
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Deploy canvas-proxy function
+        run: supabase functions deploy canvas-proxy --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
+
+      - name: Show function URL
+        run: echo "https://$SUPABASE_PROJECT_REF.supabase.co/functions/v1/canvas-proxy"
