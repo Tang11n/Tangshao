@@ -1,0 +1,4 @@
+project_id = "tangshao-canvas"
+
+[functions.canvas-proxy]
+verify_jwt = false
